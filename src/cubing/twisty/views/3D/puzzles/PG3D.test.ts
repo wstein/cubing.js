@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
 import type { Mesh } from "three/src/objects/Mesh.js";
+import { Move } from "../../../../alg";
 import { cube3x3x3, puzzles } from "../../../../puzzles";
 import {
   type ExperimentalCubeColorScheme,
   resolveCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
-import { Move } from "../../../../alg";
 import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
@@ -90,8 +90,6 @@ test("PG3D does not rewind moves when updating cube color scheme", async () => {
         move,
         direction: -1,
         fraction: 1,
-        startTimestamp: 0 as any,
-        endTimestamp: 100 as any,
       },
     ],
   });
