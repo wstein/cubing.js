@@ -5,7 +5,8 @@ import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
   scheme: "boy" | "japanese",
-  zDirection: 1 | -1,
+  axis: "y" | "z",
+  direction: 1 | -1,
 ): Promise<number[]> {
   const pg3d = new PG3D(
     () => {},
@@ -22,17 +23,23 @@ async function stickerColorOnFace(
   const colors = mesh.geometry.getAttribute("color");
 
   for (let i = 0; i < positions.count; i++) {
-    if (positions.getZ(i) * zDirection > 1.5) {
+    if (positions.getComponent(i, axis === "y" ? 1 : 2) * direction > 1.5) {
       const colorOffset = i * 3;
       return Array.from(colors.array.slice(colorOffset, colorOffset + 3));
     }
   }
-  throw new Error(`No sticker vertex found on z=${zDirection}`);
+  throw new Error(`No sticker vertex found on ${axis}=${direction}`);
 }
 
-test("PG3D renders Japanese front and back sticker colors", async () => {
-  expect(await stickerColorOnFace("boy", 1)).toEqual([68, 238, 0]);
-  expect(await stickerColorOnFace("boy", -1)).toEqual([34, 102, 255]);
-  expect(await stickerColorOnFace("japanese", 1)).toEqual([34, 102, 255]);
-  expect(await stickerColorOnFace("japanese", -1)).toEqual([68, 238, 0]);
+test("PG3D renders the Japanese blue-yellow swap", async () => {
+  expect(await stickerColorOnFace("boy", "z", 1)).toEqual([68, 238, 0]);
+  expect(await stickerColorOnFace("boy", "z", -1)).toEqual([34, 102, 255]);
+  expect(await stickerColorOnFace("boy", "y", -1)).toEqual([244, 244, 0]);
+  expect(await stickerColorOnFace("japanese", "z", 1)).toEqual([68, 238, 0]);
+  expect(await stickerColorOnFace("japanese", "z", -1)).toEqual([
+    244, 244, 0,
+  ]);
+  expect(await stickerColorOnFace("japanese", "y", -1)).toEqual([
+    34, 102, 255,
+  ]);
 });
