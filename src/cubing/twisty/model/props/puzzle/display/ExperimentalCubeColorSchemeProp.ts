@@ -9,19 +9,21 @@ import { SimpleTwistyPropSource } from "../../TwistyProp";
  */
 export type ExperimentalCubeColorScheme = "boy" | "japanese";
 
-const blue = 0x2266ff;
-const yellow = 0xf4f400;
+const cubeStickerColors = {
+  blue: 0x2266ff,
+  yellow: 0xf4f400,
+} as const;
 
 export function cubeColorForScheme(
   color: number,
   scheme: ExperimentalCubeColorScheme,
 ): number {
   if (scheme === "japanese") {
-    if (color === blue) {
-      return yellow;
+    if (color === cubeStickerColors.blue) {
+      return cubeStickerColors.yellow;
     }
-    if (color === yellow) {
-      return blue;
+    if (color === cubeStickerColors.yellow) {
+      return cubeStickerColors.blue;
     }
   }
   return color;
