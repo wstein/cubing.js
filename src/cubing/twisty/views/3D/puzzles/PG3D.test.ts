@@ -5,6 +5,7 @@ import {
   type ExperimentalCubeColorScheme,
   resolveCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import { Move } from "../../../../alg";
 import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
@@ -64,4 +65,51 @@ test("PG3D safely handles non-cube puzzles with a color scheme", async () => {
     { experimentalCubeColorScheme: resolveCubeColorScheme("japanese") },
   );
   expect(pg3d.children.length).toBeGreaterThan(0);
+});
+
+test("PG3D does not rewind moves when updating cube color scheme", async () => {
+  const kpuzzle = await cube3x3x3.kpuzzle();
+  const pg3d = new PG3D(
+    () => {},
+    kpuzzle,
+    (await cube3x3x3.pg!()).get3d({ darkIgnoredOrbits: false }),
+    true,
+    false,
+    undefined,
+    1,
+  );
+
+  const move = new Move("R");
+  const patternAfterMove = kpuzzle.defaultPattern().applyMove(move);
+
+  // 1. Initial frame of catchUpMove: pattern updated, move is animating backwards
+  pg3d.onPositionChange({
+    pattern: patternAfterMove,
+    movesInProgress: [
+      {
+        move,
+        direction: -1,
+        fraction: 1,
+        startTimestamp: 0 as any,
+        endTimestamp: 100 as any,
+      },
+    ],
+  });
+
+  // 2. Animation completes: pattern unchanged, movesInProgress is empty
+  pg3d.onPositionChange({
+    pattern: patternAfterMove,
+    movesInProgress: [],
+  });
+
+  expect((pg3d as any).movingObj.rotation.x).toBeCloseTo(0);
+  expect((pg3d as any).movingObj.rotation.y).toBeCloseTo(0);
+  expect((pg3d as any).movingObj.rotation.z).toBeCloseTo(0);
+
+  // 3. Changing color scheme should NOT set state back to the catch-up move
+  pg3d.experimentalUpdateCubeColorScheme(resolveCubeColorScheme("japanese"));
+
+  expect((pg3d as any).movingObj.rotation.x).toBeCloseTo(0);
+  expect((pg3d as any).movingObj.rotation.y).toBeCloseTo(0);
+  expect((pg3d as any).movingObj.rotation.z).toBeCloseTo(0);
 });

@@ -11,7 +11,7 @@ import { Group } from "three/src/objects/Group.js";
 import { Mesh } from "three/src/objects/Mesh.js";
 import type { Texture } from "three/src/textures/Texture.js";
 import { Move } from "../../../../alg";
-import type { KPuzzle, KTransformation } from "../../../../kpuzzle";
+import type { KPattern, KPuzzle, KTransformation } from "../../../../kpuzzle";
 import type {
   StickerDat,
   StickerDatAxis,
@@ -544,6 +544,7 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
   private foundationBound: number; // before this: colored; after: black
   private fixedGeo: BufferGeometry;
   private lastPos?: PuzzlePosition;
+  private lastPattern?: KPattern;
   private lastMoveTransformation?: KTransformation;
   private hintMaterial: Material;
   private stickerMaterial: Material;
@@ -866,9 +867,9 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
     const filler = this.filler;
     const ind = filler.ind;
     if (
-      !this.lastPos ||
+      !this.lastPattern ||
       this.#pendingStickeringUpdate ||
-      !this.lastPos.pattern.isIdentical(pattern)
+      !this.lastPattern.isIdentical(pattern)
     ) {
       for (const orbit in this.stickers) {
         const pieces = this.stickers[orbit];
@@ -899,8 +900,9 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
           }
         }
       }
-      this.lastPos = p;
+      this.lastPattern = pattern;
     }
+    this.lastPos = p;
     let vismods = 0;
     for (const moveProgress of p.movesInProgress) {
       const externalMove = moveProgress.move;
