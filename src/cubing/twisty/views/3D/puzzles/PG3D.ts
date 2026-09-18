@@ -25,9 +25,9 @@ import {
 } from "../../../../puzzles/cubing-private";
 import type { PuzzlePosition } from "../../../controllers/AnimationTypes";
 import { smootherStep } from "../../../controllers/easing";
-import {
-  cubeColorForScheme,
-  type ExperimentalCubeColorScheme,
+import type {
+  CubeFace,
+  ResolvedCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { HintFaceletStyle } from "../../../model/props/puzzle/display/HintFaceletProp";
 import { TAU } from "../TAU";
@@ -226,23 +226,23 @@ class StickerDef {
   public foundationEnd?: number;
   private isDup: boolean;
   private faceNum: number;
+  private faceName: CubeFace;
   constructor(
     filler: Filler,
     stickerDat: StickerDatSticker,
+    faceName: CubeFace,
     trim: number,
     options?: {
-      experimentalCubeColorScheme?: ExperimentalCubeColorScheme;
+      experimentalCubeColorScheme?: ResolvedCubeColorScheme;
       stickeringMask?: ExperimentalFaceletMeshStickeringMask;
     },
   ) {
     this.isDup = !!stickerDat.isDup;
     this.faceNum = stickerDat.face;
+    this.faceName = faceName;
     this.stickerStart = filler.ipos;
     this.defaultColor = new Color(stickerDat.color).getHex();
-    const sdColor = cubeColorForScheme(
-      this.defaultColor,
-      options?.experimentalCubeColorScheme ?? "boy",
-    );
+    const sdColor = this.cubeColor(options?.experimentalCubeColorScheme);
     this.origColor = sdColor;
     this.origColorStickeringMask = sdColor;
     if (options?.stickeringMask) {
@@ -256,6 +256,10 @@ class StickerDef {
 
   private stickerCoords(coords: number[], trim: number): number[] {
     return trimEdges(coords.slice(), trim);
+  }
+
+  private cubeColor(scheme?: ResolvedCubeColorScheme): number {
+    return new Color(scheme?.[this.faceName] ?? this.defaultColor).getHex();
   }
 
   private hintCoords(
@@ -385,11 +389,8 @@ class StickerDef {
     );
   }
 
-  setCubeColorScheme(
-    filler: Filler,
-    scheme: ExperimentalCubeColorScheme,
-  ): void {
-    this.origColor = cubeColorForScheme(this.defaultColor, scheme);
+  setCubeColorScheme(filler: Filler, scheme: ResolvedCubeColorScheme): void {
+    this.origColor = this.cubeColor(scheme);
     this.setStickeringMask(filler, this.stickeringMask);
   }
 
@@ -491,7 +492,7 @@ class AxisInfo {
 }
 
 export interface PG3DOptions {
-  experimentalCubeColorScheme?: ExperimentalCubeColorScheme;
+  experimentalCubeColorScheme?: ResolvedCubeColorScheme;
   stickeringMask?: ExperimentalStickeringMask;
 }
 
@@ -628,7 +629,7 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
         this.stickers[orbit][ori] = [];
       }
       const options: {
-        experimentalCubeColorScheme?: ExperimentalCubeColorScheme;
+        experimentalCubeColorScheme?: ResolvedCubeColorScheme;
         stickeringMask?: ExperimentalFaceletMeshStickeringMask;
       } = {};
       if (params.experimentalCubeColorScheme) {
@@ -644,7 +645,13 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
           false,
         );
       }
-      const stickerdef = new StickerDef(filler, sticker, trim, options);
+      const stickerdef = new StickerDef(
+        filler,
+        sticker,
+        stickerDat.faces[sticker.face].name as CubeFace,
+        trim,
+        options,
+      );
       this.stickers[orbit][ori][ord] = stickerdef;
     }
     // TODO: the argument enableHintStickersOpt really means, do we ever want to display
@@ -1104,7 +1111,7 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
   }
 
   public experimentalUpdateCubeColorScheme(
-    scheme: ExperimentalCubeColorScheme,
+    scheme: ResolvedCubeColorScheme,
   ): void {
     if (this.params.experimentalCubeColorScheme === scheme) {
       return;

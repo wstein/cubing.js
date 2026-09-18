@@ -1,10 +1,14 @@
 import { expect, test } from "bun:test";
 import type { Mesh } from "three/src/objects/Mesh.js";
 import { cube3x3x3 } from "../../../../puzzles";
+import {
+  type ExperimentalCubeColorScheme,
+  resolveCubeColorScheme,
+} from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
-  scheme: "boy" | "japanese",
+  scheme: ExperimentalCubeColorScheme,
   axis: "y" | "z",
   direction: 1 | -1,
 ): Promise<number[]> {
@@ -16,7 +20,7 @@ async function stickerColorOnFace(
     false,
     undefined,
     1,
-    { experimentalCubeColorScheme: scheme },
+    { experimentalCubeColorScheme: resolveCubeColorScheme(scheme) },
   );
   const mesh = pg3d.children[0] as Mesh;
   const positions = mesh.geometry.getAttribute("position");
@@ -38,4 +42,12 @@ test("PG3D renders the Japanese blue-yellow swap", async () => {
   expect(await stickerColorOnFace("japanese", "z", 1)).toEqual([68, 238, 0]);
   expect(await stickerColorOnFace("japanese", "z", -1)).toEqual([244, 244, 0]);
   expect(await stickerColorOnFace("japanese", "y", -1)).toEqual([34, 102, 255]);
+});
+
+test("PG3D applies custom colors by face", async () => {
+  const scheme = { F: "black", D: 0xffffff };
+
+  expect(await stickerColorOnFace(scheme, "z", 1)).toEqual([0, 0, 0]);
+  expect(await stickerColorOnFace(scheme, "y", -1)).toEqual([255, 255, 255]);
+  expect(await stickerColorOnFace(scheme, "z", -1)).toEqual([34, 102, 255]);
 });

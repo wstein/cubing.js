@@ -1,27 +1,45 @@
 import { expect, test } from "bun:test";
 import {
-  cubeColorForScheme,
+  BOY_CUBE_COLOR_SCHEME,
   ExperimentalCubeColorSchemeProp,
+  JAPANESE_CUBE_COLOR_SCHEME,
+  resolveCubeColorScheme,
 } from "./ExperimentalCubeColorSchemeProp";
 
-test("defaults to BOY and accepts the Japanese cube color scheme", async () => {
+test("defaults to the BOY cube color scheme", async () => {
   const prop = new ExperimentalCubeColorSchemeProp();
 
-  expect(await prop.get()).toBe("boy");
-
-  prop.set("japanese");
-  expect(await prop.get()).toBe("japanese");
+  expect(await prop.get()).toEqual(BOY_CUBE_COLOR_SCHEME);
 });
 
-test("Japanese swaps the blue and yellow sticker colors while BOY preserves them", () => {
-  const green = 0x44ee00;
-  const blue = 0x2266ff;
-  const yellow = 0xf4f400;
+test("resolves named cube color schemes by face", () => {
+  expect(resolveCubeColorScheme("boy")).toEqual(BOY_CUBE_COLOR_SCHEME);
+  expect(resolveCubeColorScheme("western")).toEqual(BOY_CUBE_COLOR_SCHEME);
+  expect(resolveCubeColorScheme("japanese")).toEqual(
+    JAPANESE_CUBE_COLOR_SCHEME,
+  );
+});
 
-  expect(cubeColorForScheme(green, "boy")).toBe(green);
-  expect(cubeColorForScheme(blue, "boy")).toBe(blue);
-  expect(cubeColorForScheme(yellow, "boy")).toBe(yellow);
-  expect(cubeColorForScheme(green, "japanese")).toBe(green);
-  expect(cubeColorForScheme(blue, "japanese")).toBe(yellow);
-  expect(cubeColorForScheme(yellow, "japanese")).toBe(blue);
+test("merges a custom cube color scheme with BOY", async () => {
+  const prop = new ExperimentalCubeColorSchemeProp();
+
+  prop.set({ U: "black", D: 0xffffff });
+  expect(await prop.get()).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "black",
+    D: 0xffffff,
+  });
+});
+
+test("parses serialized custom cube color schemes", () => {
+  expect(resolveCubeColorScheme("U:#000,D:#fff")).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "#000",
+    D: "#fff",
+  });
+  expect(resolveCubeColorScheme('{"F":"lime","B":"yellow"}')).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    F: "lime",
+    B: "yellow",
+  });
 });

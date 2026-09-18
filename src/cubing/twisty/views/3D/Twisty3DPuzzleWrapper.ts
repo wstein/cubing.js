@@ -4,7 +4,7 @@ import type { ExperimentalStickeringMask } from "../../../puzzles/cubing-private
 import type { PuzzlePosition } from "../../controllers/AnimationTypes";
 import type { Schedulable } from "../../controllers/RenderScheduler";
 import { bulk3DCode } from "../../heavy-code-imports/3d";
-import type { ExperimentalCubeColorScheme } from "../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import type { ResolvedCubeColorScheme } from "../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { FoundationDisplay } from "../../model/props/puzzle/display/FoundationDisplayProp";
 import type { HintFaceletStyleWithAuto } from "../../model/props/puzzle/display/HintFaceletProp";
 import { FreshListenerManager } from "../../model/props/TwistyProp";
@@ -110,7 +110,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
 
     this.#freshListenerManager.addListener(
       this.model.twistySceneModel.experimentalCubeColorScheme,
-      async (scheme: ExperimentalCubeColorScheme) => {
+      async (scheme: ResolvedCubeColorScheme) => {
         const twisty3D = await this.twisty3DPuzzle();
         if ("experimentalUpdateCubeColorScheme" in twisty3D) {
           (twisty3D as PG3D).experimentalUpdateCubeColorScheme(scheme);
