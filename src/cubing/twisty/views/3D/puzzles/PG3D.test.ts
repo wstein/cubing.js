@@ -55,8 +55,8 @@ test("PG3D applies custom colors by face", async () => {
 test("PG3D safely handles non-cube puzzles with a color scheme", async () => {
   const pg3d = new PG3D(
     () => {},
-    await puzzles.pyraminx.kpuzzle(),
-    (await puzzles.pyraminx.pg!()).get3d({ darkIgnoredOrbits: false }),
+    await puzzles["pyraminx"].kpuzzle(),
+    (await puzzles["pyraminx"].pg!()).get3d({ darkIgnoredOrbits: false }),
     true,
     false,
     undefined,
