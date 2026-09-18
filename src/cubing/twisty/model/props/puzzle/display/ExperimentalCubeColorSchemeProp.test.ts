@@ -42,4 +42,14 @@ test("parses serialized custom cube color schemes", () => {
     F: "lime",
     B: "yellow",
   });
+  expect(resolveCubeColorScheme(" u : #000 , d : #fff ")).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "#000",
+    D: "#fff",
+  });
+  expect(resolveCubeColorScheme({ u: "black", d: 0xffffff } as any)).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "black",
+    D: 0xffffff,
+  });
 });

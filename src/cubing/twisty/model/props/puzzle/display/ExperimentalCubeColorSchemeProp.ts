@@ -41,18 +41,21 @@ function parseCustomCubeColorScheme(input: unknown): CustomCubeColorScheme {
     throw new Error("Cube color schemes must be face-to-color objects.");
   }
   const scheme: CustomCubeColorScheme = {};
-  for (const [face, color] of Object.entries(input)) {
+  for (const [rawFace, color] of Object.entries(input)) {
+    const face = rawFace.trim().toUpperCase();
     if (!isCubeFace(face)) {
-      throw new Error(`Unknown cube face: ${face}`);
+      throw new Error(`Unknown cube face: ${rawFace}`);
     }
+    const normalizedColor = typeof color === "string" ? color.trim() : color;
     if (
-      (typeof color !== "string" && typeof color !== "number") ||
-      color === "" ||
-      (typeof color === "number" && !Number.isFinite(color))
+      (typeof normalizedColor !== "string" &&
+        typeof normalizedColor !== "number") ||
+      normalizedColor === "" ||
+      (typeof normalizedColor === "number" && !Number.isFinite(normalizedColor))
     ) {
-      throw new Error(`Invalid color for ${face}.`);
+      throw new Error(`Invalid color for ${rawFace}.`);
     }
-    scheme[face] = color;
+    scheme[face] = normalizedColor;
   }
   return scheme;
 }
@@ -60,16 +63,23 @@ function parseCustomCubeColorScheme(input: unknown): CustomCubeColorScheme {
 function parseSerializedCubeColorScheme(
   input: SerializedCubeColorScheme,
 ): CustomCubeColorScheme {
-  if (input.startsWith("{")) {
-    return parseCustomCubeColorScheme(JSON.parse(input));
+  const trimmed = input.trim();
+  if (trimmed.startsWith("{")) {
+    return parseCustomCubeColorScheme(JSON.parse(trimmed));
   }
   const scheme: Record<string, string> = {};
-  for (const entry of input.split(",")) {
+  for (const rawEntry of trimmed.split(",")) {
+    const entry = rawEntry.trim();
+    if (!entry) {
+      continue;
+    }
     const separator = entry.indexOf(":");
     if (separator <= 0 || separator === entry.length - 1) {
       throw new Error(`Invalid cube color scheme entry: ${entry}`);
     }
-    scheme[entry.slice(0, separator)] = entry.slice(separator + 1);
+    scheme[entry.slice(0, separator).trim()] = entry
+      .slice(separator + 1)
+      .trim();
   }
   return parseCustomCubeColorScheme(scheme);
 }
