@@ -25,6 +25,14 @@ export type { ExperimentalStickering } from "./model/props/puzzle/display/Sticke
 export type { PuzzleID } from "./model/props/puzzle/structure/PuzzleIDRequestProp";
 export { NO_VALUE as EXPERIMENTAL_PROP_NO_VALUE } from "./model/props/TwistyProp";
 export {
+  CUBE_FACES,
+  type CubeColor,
+  type CubeFace,
+  type CustomCubeColorScheme,
+  type ExperimentalCubeColorScheme,
+  type ResolvedCubeColorScheme,
+} from "./model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+export {
   type BackViewLayout,
   backViewLayouts,
 } from "./model/props/viewer/BackViewProp";
