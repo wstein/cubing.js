@@ -151,7 +151,7 @@ export interface TwistyPlayerConfig {
   backView?: BackViewLayoutWithAuto;
   experimentalInitialHintFaceletsAnimation?: InitialHintFaceletsAnimation;
   experimentalFaceletScale?: FaceletScale;
-  /** Sticker-color scheme for the PG3D renderer. */
+  /** Sticker-color scheme for 3D cube renderers. */
   experimentalCubeColorScheme?: ExperimentalCubeColorScheme;
   experimentalHintFaceletsElevation?: HintFaceletsElevationRequest;
   // "indexer"?: "indexer";

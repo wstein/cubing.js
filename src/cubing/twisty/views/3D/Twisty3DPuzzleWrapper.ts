@@ -169,6 +169,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
           initialHintFaceletsAnimation,
           faceletScale,
           hintFaceletsElevation,
+          experimentalCubeColorScheme,
         ] = await Promise.all([
           this.model.twistySceneModel.foundationStickerSprite.get(),
           this.model.twistySceneModel.hintStickerSprite.get(),
@@ -176,6 +177,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
           this.model.twistySceneModel.initialHintFaceletsAnimation.get(),
           this.model.twistySceneModel.faceletScale.get(),
           this.model.twistySceneModel.hintFaceletsElevation.get(),
+          this.model.twistySceneModel.experimentalCubeColorScheme.get(),
         ]);
         return (await bulk3DCode).cube3DShim(
           () => this.schedulable.scheduleRender(),
@@ -186,6 +188,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
             initialHintFaceletsAnimation,
             faceletScale,
             hintFaceletsElevation,
+            experimentalCubeColorScheme,
           },
         );
       } else {

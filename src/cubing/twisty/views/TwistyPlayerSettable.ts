@@ -106,9 +106,9 @@ export abstract class TwistyPlayerSettable extends ManagedCustomElement {
   }
 
   /**
-   * Selects sticker colors for the PG3D renderer. Use `visualization: "PG3D"`.
+   * Selects sticker colors for 3D cube renderers.
    */
-  set experimentalCubeColorScheme(scheme: ExperimentalCubeColorScheme,) {
+  set experimentalCubeColorScheme(scheme: ExperimentalCubeColorScheme) {
     this.experimentalModel.twistySceneModel.experimentalCubeColorScheme.set(
       scheme,
     );
