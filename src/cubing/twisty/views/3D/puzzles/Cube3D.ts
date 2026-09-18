@@ -25,6 +25,10 @@ import type {
   PuzzlePosition,
 } from "../../../controllers/AnimationTypes";
 import { smootherStep } from "../../../controllers/easing";
+import {
+  CUBE_FACES,
+  type ResolvedCubeColorScheme,
+} from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { FaceletScale } from "../../../model/props/puzzle/display/FaceletScaleProp";
 import {
   type HintFaceletStyle,
@@ -256,6 +260,7 @@ export interface Cube3DOptions {
   initialHintFaceletsAnimation?: InitialHintFaceletsAnimation;
   faceletScale?: "auto" | number;
   hintFaceletsElevation?: "auto" | number;
+  experimentalCubeColorScheme?: ResolvedCubeColorScheme;
 }
 
 const cube3DOptionsDefaults: Cube3DOptions = {
@@ -401,6 +406,8 @@ interface FaceletInfo {
   faceIdx: number;
   facelet: Mesh;
   hintFacelet?: Mesh;
+  stickeringMask: FaceletMeshStickeringMask;
+  hintStickeringMask: FaceletMeshStickeringMask;
 }
 
 // TODO: Compatibility with Randelshofer or standard net layout? Offer a
@@ -575,6 +582,37 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
   // TODO: Keep track of option-based meshes better.
   private experimentalHintStickerMeshes: Mesh[] = [];
   private experimentalFoundationMeshes: Mesh[] = [];
+
+  private stickerMaterial(
+    faceIdx: number,
+    isHint: boolean,
+    stickeringMask: FaceletMeshStickeringMask,
+  ): MeshBasicMaterial {
+    const defaultMaterial = isHint
+      ? axesInfo[faceIdx].hintStickerMaterial[stickeringMask]
+      : axesInfo[faceIdx].stickerMaterial[stickeringMask];
+    const color =
+      this.options.experimentalCubeColorScheme?.[CUBE_FACES[faceIdx]];
+    if (
+      typeof color === "undefined" ||
+      (stickeringMask !== "regular" && stickeringMask !== "dim")
+    ) {
+      return defaultMaterial;
+    }
+    const regularColor = new Color(color).getHex();
+    const materialColor =
+      stickeringMask === "dim"
+        ? regularColor === 0xffffff
+          ? 0xdddddd
+          : new Color(regularColor).multiplyScalar(0.5).getHex()
+        : regularColor;
+    return new MeshBasicMaterial({
+      color: new Color(materialColor).convertLinearToSRGB(),
+      side: isHint ? BackSide : FrontSide,
+      transparent: isHint,
+      opacity: isHint ? 0.5 * axesInfo[faceIdx].hintOpacityScale : 1,
+    });
+  }
 
   #setSpriteURL: ((url: string) => void) | undefined;
   private sprite: Texture | Promise<Texture> = new Promise((resolve) => {
@@ -780,18 +818,24 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
                   ? faceletStickeringMask
                   : faceletStickeringMask?.mask;
 
-              faceletInfo.facelet.material =
-                axesInfo[faceletInfo.faceIdx].stickerMaterial[stickeringMask];
+              faceletInfo.stickeringMask = stickeringMask;
+              faceletInfo.facelet.material = this.stickerMaterial(
+                faceletInfo.faceIdx,
+                false,
+                stickeringMask,
+              );
               // TODO
               const hintStickeringMask =
                 typeof faceletStickeringMask === "string"
                   ? stickeringMask
                   : (faceletStickeringMask.hintMask ?? stickeringMask);
               if (faceletInfo.hintFacelet) {
-                faceletInfo.hintFacelet.material =
-                  axesInfo[faceletInfo.faceIdx].hintStickerMaterial[
-                    hintStickeringMask
-                  ];
+                faceletInfo.hintStickeringMask = hintStickeringMask;
+                faceletInfo.hintFacelet.material = this.stickerMaterial(
+                  faceletInfo.faceIdx,
+                  true,
+                  hintStickeringMask,
+                );
               }
             }
           }
@@ -801,6 +845,36 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
     if (this.scheduleRenderCallback) {
       this.scheduleRenderCallback();
     }
+  }
+
+  public experimentalUpdateCubeColorScheme(
+    scheme: ResolvedCubeColorScheme,
+  ): void {
+    if (
+      this.options.experimentalStickeringMask?.specialBehaviour === "picture"
+    ) {
+      return;
+    }
+    this.options.experimentalCubeColorScheme = scheme;
+    for (const pieceInfos of Object.values(this.kpuzzleFaceletInfo)) {
+      for (const faceletInfos of pieceInfos) {
+        for (const faceletInfo of faceletInfos) {
+          faceletInfo.facelet.material = this.stickerMaterial(
+            faceletInfo.faceIdx,
+            false,
+            faceletInfo.stickeringMask,
+          );
+          if (faceletInfo.hintFacelet) {
+            faceletInfo.hintFacelet.material = this.stickerMaterial(
+              faceletInfo.faceIdx,
+              true,
+              faceletInfo.hintStickeringMask,
+            );
+          }
+        }
+      }
+    }
+    this.scheduleRenderCallback?.();
   }
 
   /** @deprecated */
@@ -919,7 +993,14 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
       const faceletInfo: FaceletInfo = {
         faceIdx: piece.stickerFaces[i],
         facelet: sticker,
+        stickeringMask: "regular",
+        hintStickeringMask: "regular",
       };
+      sticker.material = this.stickerMaterial(
+        faceletInfo.faceIdx,
+        false,
+        faceletInfo.stickeringMask,
+      );
       cubie.add(sticker);
       if (this.options.hintFacelets === "floating") {
         const hintSticker = this.createSticker(
@@ -929,6 +1010,11 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
         );
         cubie.add(hintSticker);
         faceletInfo.hintFacelet = hintSticker;
+        hintSticker.material = this.stickerMaterial(
+          faceletInfo.faceIdx,
+          true,
+          faceletInfo.hintStickeringMask,
+        );
         this.experimentalHintStickerMeshes.push(hintSticker);
       }
 

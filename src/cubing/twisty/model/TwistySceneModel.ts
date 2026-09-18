@@ -1,4 +1,5 @@
 import { URLProp } from "./props/general/URLProp";
+import { ExperimentalCubeColorSchemeProp } from "./props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import { FaceletScaleProp } from "./props/puzzle/display/FaceletScaleProp";
 import { FoundationDisplayProp } from "./props/puzzle/display/FoundationDisplayProp";
 import { HintFaceletProp } from "./props/puzzle/display/HintFaceletProp";
@@ -41,6 +42,7 @@ export class TwistySceneModel {
   stickeringMaskRequest = new StickeringMaskRequestProp();
   stickeringRequest = new StickeringRequestProp();
   faceletScale = new FaceletScaleProp();
+  experimentalCubeColorScheme = new ExperimentalCubeColorSchemeProp();
 
   // Depth 1
   colorScheme = new ColorSchemeProp({

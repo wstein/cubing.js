@@ -21,6 +21,14 @@ export type {
 export { SimpleAlgIndexer } from "./controllers/indexer/SimpleAlgIndexer";
 export { TreeAlgIndexer } from "./controllers/indexer/tree/TreeAlgIndexer";
 export { setTwistyDebug } from "./debug";
+export {
+  CUBE_FACES,
+  type CubeColor,
+  type CubeFace,
+  type CustomCubeColorScheme,
+  type ExperimentalCubeColorScheme,
+  type ResolvedCubeColorScheme,
+} from "./model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 export type { ExperimentalStickering } from "./model/props/puzzle/display/StickeringRequestProp";
 export type { PuzzleID } from "./model/props/puzzle/structure/PuzzleIDRequestProp";
 export { NO_VALUE as EXPERIMENTAL_PROP_NO_VALUE } from "./model/props/TwistyProp";
