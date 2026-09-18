@@ -36,10 +36,6 @@ test("PG3D renders the Japanese blue-yellow swap", async () => {
   expect(await stickerColorOnFace("boy", "z", -1)).toEqual([34, 102, 255]);
   expect(await stickerColorOnFace("boy", "y", -1)).toEqual([244, 244, 0]);
   expect(await stickerColorOnFace("japanese", "z", 1)).toEqual([68, 238, 0]);
-  expect(await stickerColorOnFace("japanese", "z", -1)).toEqual([
-    244, 244, 0,
-  ]);
-  expect(await stickerColorOnFace("japanese", "y", -1)).toEqual([
-    34, 102, 255,
-  ]);
+  expect(await stickerColorOnFace("japanese", "z", -1)).toEqual([244, 244, 0]);
+  expect(await stickerColorOnFace("japanese", "y", -1)).toEqual([34, 102, 255]);
 });
