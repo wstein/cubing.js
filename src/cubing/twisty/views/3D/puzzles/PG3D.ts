@@ -226,11 +226,11 @@ class StickerDef {
   public foundationEnd?: number;
   private isDup: boolean;
   private faceNum: number;
-  private faceName: CubeFace;
+  private faceName: string;
   constructor(
     filler: Filler,
     stickerDat: StickerDatSticker,
-    faceName: CubeFace,
+    faceName: string,
     trim: number,
     options?: {
       experimentalCubeColorScheme?: ResolvedCubeColorScheme;
@@ -259,7 +259,11 @@ class StickerDef {
   }
 
   private cubeColor(scheme?: ResolvedCubeColorScheme): number {
-    return new Color(scheme?.[this.faceName] ?? this.defaultColor).getHex();
+    const color =
+      this.faceName in (scheme ?? {})
+        ? scheme?.[this.faceName as CubeFace]
+        : undefined;
+    return new Color(color ?? this.defaultColor).getHex();
   }
 
   private hintCoords(
@@ -648,7 +652,7 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
       const stickerdef = new StickerDef(
         filler,
         sticker,
-        stickerDat.faces[sticker.face].name as CubeFace,
+        stickerDat.faces[sticker.face].name,
         trim,
         options,
       );

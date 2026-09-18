@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Mesh } from "three/src/objects/Mesh.js";
-import { cube3x3x3 } from "../../../../puzzles";
+import { cube3x3x3, puzzles } from "../../../../puzzles";
 import {
   type ExperimentalCubeColorScheme,
   resolveCubeColorScheme,
@@ -50,4 +50,18 @@ test("PG3D applies custom colors by face", async () => {
   expect(await stickerColorOnFace(scheme, "z", 1)).toEqual([0, 0, 0]);
   expect(await stickerColorOnFace(scheme, "y", -1)).toEqual([255, 255, 255]);
   expect(await stickerColorOnFace(scheme, "z", -1)).toEqual([34, 102, 255]);
+});
+
+test("PG3D safely handles non-cube puzzles with a color scheme", async () => {
+  const pg3d = new PG3D(
+    () => {},
+    await puzzles.pyraminx.kpuzzle(),
+    (await puzzles.pyraminx.pg!()).get3d({ darkIgnoredOrbits: false }),
+    true,
+    false,
+    undefined,
+    1,
+    { experimentalCubeColorScheme: resolveCubeColorScheme("japanese") },
+  );
+  expect(pg3d.children.length).toBeGreaterThan(0);
 });
