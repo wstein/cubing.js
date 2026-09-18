@@ -12,6 +12,17 @@ test("can construct TwistyPlayer via constructor with empty config", () => {
   new TwistyPlayer({});
 });
 
+test("accepts a Japanese cube-color scheme request", async () => {
+  const player = new TwistyPlayer({
+    visualization: "PG3D",
+    experimentalCubeColorScheme: "japanese",
+  });
+
+  expect(
+    await player.experimentalModel.twistySceneModel.experimentalCubeColorScheme.get(),
+  ).to.equal("japanese");
+});
+
 test("can construct TwistyPlayer via constructor with fancy config", async () => {
   // Example from https://js.cubing.net/cubing/twisty/#parameters
   expect(

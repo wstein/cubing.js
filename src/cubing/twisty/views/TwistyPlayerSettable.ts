@@ -3,6 +3,7 @@ import type { PuzzleDescriptionString } from "../../puzzle-geometry/pgPuzzles";
 import type { StickeringMask } from "../../puzzles/stickerings/mask";
 import type { ExperimentalStickering, PuzzleID } from "../../twisty";
 import type { MillisecondTimestamp } from "../controllers/AnimationTypes";
+import type { ExperimentalCubeColorScheme } from "../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { FaceletScale } from "../model/props/puzzle/display/FaceletScaleProp";
 import type { HintFaceletStyleWithAuto } from "../model/props/puzzle/display/HintFaceletProp";
 import type { InitialHintFaceletsAnimation } from "../model/props/puzzle/display/InitialHintFaceletsAnimationProp";
@@ -102,6 +103,18 @@ export abstract class TwistyPlayerSettable extends ManagedCustomElement {
 
   get experimentalFaceletScale(): never {
     throw err("experimentalFaceletScale");
+  }
+
+  /**
+   * Selects sticker colors for the PG3D renderer. Use `visualization: "PG3D"`.
+   */
+  set experimentalCubeColorScheme(scheme: ExperimentalCubeColorScheme,) {
+    this.experimentalModel.twistySceneModel.experimentalCubeColorScheme.set(
+      scheme,
+    );
+  }
+  get experimentalCubeColorScheme(): never {
+    throw err("experimentalCubeColorScheme");
   }
 
   set backView(backView: BackViewLayoutWithAuto) {

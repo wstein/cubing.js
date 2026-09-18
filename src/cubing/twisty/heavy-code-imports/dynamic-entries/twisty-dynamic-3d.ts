@@ -1,4 +1,5 @@
 import { cube3x3x3, type PuzzleLoader } from "../../../puzzles";
+import type { ExperimentalCubeColorScheme } from "../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { FaceletScale } from "../../model/props/puzzle/display/FaceletScaleProp";
 import type { HintFaceletStyle } from "../../model/props/puzzle/display/HintFaceletProp";
 import { Cube3D, type Cube3DOptions } from "../../views/3D/puzzles/Cube3D";
@@ -32,6 +33,7 @@ export async function pg3dShim(
   hintFacelets: HintFaceletStyle,
   faceletScale: FaceletScale,
   darkIgnoredOrbits: boolean,
+  experimentalCubeColorScheme: ExperimentalCubeColorScheme,
 ): Promise<PG3D> {
   return new PG3D(
     renderCallback,
@@ -41,5 +43,6 @@ export async function pg3dShim(
     hintFacelets === "floating",
     undefined,
     faceletScale,
+    { experimentalCubeColorScheme },
   );
 }
