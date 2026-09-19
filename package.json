@@ -113,7 +113,6 @@
   "scripts": {
     "build": "make build",
     "dev": "make dev",
-    "prepare": "make build-dist",
     "prepublishOnly": "make prepublishOnly",
     "postpublish": "make postpublish"
   },

@@ -1,0 +1,61 @@
+name: Build Dist
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to build dist for"
+        required: true
+        default: "develop"
+
+jobs:
+  build-dist:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+          lfs: "true"
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: latest
+
+      - name: Setup dependencies
+        run: make setup-without-playwright
+
+      - name: Build dist and types
+        run: make build-lib build-bin
+
+      - name: Commit and push distribution artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TARGET_BRANCH="${{ inputs.branch || github.ref_name }}"
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DIST_BRANCH="${TARGET_BRANCH}-dist"
+          DIST_TAG="dist-${SHORT_SHA}"
+
+          # Un-ignore dist and legacy index.d.ts files so git tracks them
+          sed -i '/^\/dist/d' .gitignore
+          sed -i '/^\/.*\/index\.d\.ts/d' .gitignore
+
+          git checkout -B "$DIST_BRANCH"
+          git add -f dist/lib dist/bin */index.d.ts .gitignore
+          git commit -m "build: dist for ${TARGET_BRANCH}@${SHORT_SHA}"
+
+          echo "Pushing to branch ${DIST_BRANCH}..."
+          git push origin "$DIST_BRANCH" --force
+
+          echo "Pushing tag ${DIST_TAG}..."
+          git tag -f "$DIST_TAG"
+          git push origin "$DIST_TAG" --force

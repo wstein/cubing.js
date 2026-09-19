@@ -34,13 +34,6 @@ build: build-lib build-bin build-sites
 .PHONY: build-lib
 build-lib: build-lib-js build-lib-types
 
-.PHONY: build-dist
-build-dist: update-dependencies
-	${BUN_RUN} ./script/build/lib/build-lib-js.ts
-	${BUN_DX} --package tsdown tsdown --
-	${BUN_RUN} ./script/build/types/fix-web-bluetooth-reference.ts
-	${BUN_RUN} ./script/build/bin/build-bin.ts
-
 .PHONY: build-lib-js
 build-lib-js: update-dependencies
 	${BUN_RUN} ./script/build/lib/build-lib-js.ts
