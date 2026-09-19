@@ -1,6 +1,7 @@
 import { expect } from "../../../test/chai-workarounds";
 import { Alg } from "../../alg";
 import { TwistyPlayer } from "..";
+import { resolveCubeColors } from "../model/props/puzzle/display/ExperimentalCubeColorsProp";
 
 const test = it;
 
@@ -10,6 +11,26 @@ test("can construct TwistyPlayer via constructor with default config", () => {
 
 test("can construct TwistyPlayer via constructor with empty config", () => {
   new TwistyPlayer({});
+});
+
+test("accepts a Japanese cube colors request", async () => {
+  const player = new TwistyPlayer({
+    visualization: "PG3D",
+    experimentalCubeColors: "japanese",
+  });
+
+  expect(
+    await player.experimentalModel.twistySceneModel.experimentalCubeColors.get(),
+  ).to.deep.equal(resolveCubeColors("japanese"));
+});
+
+test("accepts serialized custom cube colors as an attribute", async () => {
+  const player = new TwistyPlayer();
+  player.setAttribute("experimental-cube-colors", "U:#000,D:#fff");
+
+  expect(
+    await player.experimentalModel.twistySceneModel.experimentalCubeColors.get(),
+  ).to.deep.equal(resolveCubeColors("U:#000,D:#fff"));
 });
 
 test("can construct TwistyPlayer via constructor with fancy config", async () => {

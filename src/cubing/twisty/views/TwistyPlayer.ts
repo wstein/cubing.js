@@ -8,6 +8,7 @@ import type { ExperimentalStickering } from "..";
 import { RenderScheduler } from "../controllers/RenderScheduler";
 import type { TwistyAnimationControllerDelegate } from "../controllers/TwistyAnimationController";
 import { TwistyPlayerController } from "../controllers/TwistyPlayerController";
+import type { ExperimentalCubeColors } from "../model/props/puzzle/display/ExperimentalCubeColorsProp";
 import type { FaceletScale } from "../model/props/puzzle/display/FaceletScaleProp";
 import type { HintFaceletStyleWithAuto } from "../model/props/puzzle/display/HintFaceletProp";
 import type { HintFaceletsElevationRequest } from "../model/props/puzzle/display/HintFaceletsElevationProp";
@@ -69,6 +70,7 @@ export const twistyPlayerAttributeMap = {
   "control-panel": "controlPanel",
   "back-view": "backView",
   "experimental-facelet-scale": "experimentalFaceletScale",
+  "experimental-cube-colors": "experimentalCubeColors",
   "experimental-initial-hint-facelets-animation":
     "experimentalInitialHintFaceletsAnimation",
   "experimental-hint-facelets-elevation": "experimentalHintFaceletsElevation",
@@ -149,6 +151,8 @@ export interface TwistyPlayerConfig {
   backView?: BackViewLayoutWithAuto;
   experimentalInitialHintFaceletsAnimation?: InitialHintFaceletsAnimation;
   experimentalFaceletScale?: FaceletScale;
+  /** Face colors for 3D cube renderers. */
+  experimentalCubeColors?: ExperimentalCubeColors;
   experimentalHintFaceletsElevation?: HintFaceletsElevationRequest;
   // "indexer"?: "indexer";
   viewerLink?: ViewerLinkPageWithAuto;
