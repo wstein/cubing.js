@@ -4,6 +4,7 @@ import type { ExperimentalStickeringMask } from "../../../puzzles/cubing-private
 import type { PuzzlePosition } from "../../controllers/AnimationTypes";
 import type { Schedulable } from "../../controllers/RenderScheduler";
 import { bulk3DCode } from "../../heavy-code-imports/3d";
+import type { ResolvedCubeColors } from "../../model/props/puzzle/display/ExperimentalCubeColorsProp";
 import type { FoundationDisplay } from "../../model/props/puzzle/display/FoundationDisplayProp";
 import type { HintFaceletStyleWithAuto } from "../../model/props/puzzle/display/HintFaceletProp";
 import { FreshListenerManager } from "../../model/props/TwistyProp";
@@ -107,6 +108,23 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
       },
     );
 
+    this.#freshListenerManager.addListener(
+      this.model.twistySceneModel.experimentalCubeColors,
+      async (colors: ResolvedCubeColors | undefined) => {
+        const twisty3D = await this.twisty3DPuzzle();
+        if ("experimentalUpdateCubeColors" in twisty3D) {
+          (
+            twisty3D as {
+              experimentalUpdateCubeColors: (
+                colors?: ResolvedCubeColors,
+              ) => void;
+            }
+          ).experimentalUpdateCubeColors(colors);
+          this.scheduleRender();
+        }
+      },
+    );
+
     this.#freshListenerManager.addMultiListener3(
       [
         this.model.twistySceneModel.stickeringMask,
@@ -177,19 +195,26 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
           },
         );
       } else {
-        const [hintFacelets, foundationSprite, hintSprite, faceletScale] =
-          await Promise.all([
-            this.model.twistySceneModel.hintFacelet.get(),
-            this.model.twistySceneModel.foundationStickerSprite.get(),
-            this.model.twistySceneModel.hintStickerSprite.get(),
-            this.model.twistySceneModel.faceletScale.get(),
-          ]);
+        const [
+          hintFacelets,
+          foundationSprite,
+          hintSprite,
+          faceletScale,
+          experimentalCubeColors,
+        ] = await Promise.all([
+          this.model.twistySceneModel.hintFacelet.get(),
+          this.model.twistySceneModel.foundationStickerSprite.get(),
+          this.model.twistySceneModel.hintStickerSprite.get(),
+          this.model.twistySceneModel.faceletScale.get(),
+          this.model.twistySceneModel.experimentalCubeColors.get(),
+        ]);
         const pg3d = (await bulk3DCode).pg3dShim(
           () => this.schedulable.scheduleRender(),
           this.puzzleLoader,
           hintFacelets === "auto" ? "floating" : hintFacelets,
           faceletScale,
           this.puzzleLoader.id === "kilominx", // TODO: generalize to other puzzles
+          experimentalCubeColors,
         );
         // TODO: Figure out how to do this in one place using the listener.
         pg3d.then((p) =>
