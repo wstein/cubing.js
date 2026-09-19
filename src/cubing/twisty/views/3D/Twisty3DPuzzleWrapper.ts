@@ -113,13 +113,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
       async (colors: ResolvedCubeColors | undefined) => {
         const twisty3D = await this.twisty3DPuzzle();
         if ("experimentalUpdateCubeColors" in twisty3D) {
-          (
-            twisty3D as {
-              experimentalUpdateCubeColors: (
-                colors?: ResolvedCubeColors,
-              ) => void;
-            }
-          ).experimentalUpdateCubeColors(colors);
+          (twisty3D as Cube3D | PG3D).experimentalUpdateCubeColors(colors);
           this.scheduleRender();
         }
       },
@@ -175,6 +169,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
           initialHintFaceletsAnimation,
           faceletScale,
           hintFaceletsElevation,
+          experimentalCubeColors,
         ] = await Promise.all([
           this.model.twistySceneModel.foundationStickerSprite.get(),
           this.model.twistySceneModel.hintStickerSprite.get(),
@@ -182,6 +177,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
           this.model.twistySceneModel.initialHintFaceletsAnimation.get(),
           this.model.twistySceneModel.faceletScale.get(),
           this.model.twistySceneModel.hintFaceletsElevation.get(),
+          this.model.twistySceneModel.experimentalCubeColors.get(),
         ]);
         return (await bulk3DCode).cube3DShim(
           () => this.schedulable.scheduleRender(),
@@ -192,6 +188,7 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
             initialHintFaceletsAnimation,
             faceletScale,
             hintFaceletsElevation,
+            experimentalCubeColors,
           },
         );
       } else {
