@@ -1,7 +1,9 @@
+#!/usr/bin/env -S bun run --
+
 /**
  * Usage:
  *
- *    bun run "script/bin/screenshot.ts" "R U R' U R U2' R'"
+ *    bun run -- "script/bin/screenshot.ts" "R U R' U R U2' R'"
  *
  *  */
 
@@ -34,6 +36,7 @@ import type {
 import { visualizationFormats } from "../../src/cubing/twisty/model/props/viewer/VisualizationProp.js";
 import { packageVersion } from "../../src/metadata/packageVersion.js";
 import { startServer } from "../lib/experiments-server";
+import { printInlineImage } from "./printInlineImage";
 
 const DEBUG = false;
 const PAGE_URL =
@@ -70,6 +73,11 @@ const args = run(
     ),
     // TODO: add bounds? Wrapping can be useful.
     cameraLongitude: optional(option("--camera-longitude", integer(), {})),
+    inline: optional(
+      option("--inline", {
+        description: message`Print an image to the terminal inline using the iTerm protocol: https://iterm2.com/documentation-images.html`,
+      }),
+    ),
   }),
   {
     programName: new Path(argv[1]).basename.path,
@@ -141,16 +149,27 @@ if (args.debug) {
 }
 
 await page.goto(url.toString());
-const outPath = args.outFile?.path ?? `${args.alg ?? "puzzle"}.png`;
-console.log("Output file:", outPath);
-
 await page.waitForSelector("#screenshot");
 
-await page.screenshot({
-  path: outPath,
-  omitBackground: true,
-  fullPage: true,
-});
+if (args.inline) {
+  await printInlineImage(
+    (
+      await page.screenshot({
+        omitBackground: true,
+        fullPage: true,
+      })
+    ).buffer,
+    { height: "50%" },
+  );
+} else {
+  const outPath = args.outFile?.path ?? `${args.alg ?? "puzzle"}.png`;
+  console.log("Output file:", outPath);
+  await page.screenshot({
+    path: outPath,
+    omitBackground: true,
+    fullPage: true,
+  });
+}
 
 await browser.close();
 exit(0); // TODO: avoid the need for this.
