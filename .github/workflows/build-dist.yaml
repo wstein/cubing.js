@@ -36,11 +36,19 @@ jobs:
         run: make build-lib build-bin
 
       - name: Commit and push distribution artifacts
+        env:
+          # Passed via `env` so the branch name is never parsed as shell code.
+          TARGET_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
+          if ! [[ "$TARGET_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]] ||
+            ! git check-ref-format --branch "$TARGET_BRANCH" >/dev/null; then
+            echo "Invalid branch name: $TARGET_BRANCH" >&2
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          TARGET_BRANCH="${{ inputs.branch || github.ref_name }}"
           SHORT_SHA=$(git rev-parse --short HEAD)
           DIST_BRANCH="${TARGET_BRANCH}-dist"
           DIST_TAG="dist-${SHORT_SHA}"
