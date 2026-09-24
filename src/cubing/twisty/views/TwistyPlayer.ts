@@ -153,7 +153,10 @@ export interface TwistyPlayerConfig {
   backView?: BackViewLayoutWithAuto;
   experimentalInitialHintFaceletsAnimation?: InitialHintFaceletsAnimation;
   experimentalFaceletScale?: FaceletScale;
-  /** Sticker-color scheme for 3D cube renderers. */
+  /**
+   * @deprecated Use `experimentalCubeColors`, which takes priority when both
+   * are passed.
+   */
   experimentalCubeColorScheme?: ExperimentalCubeColorScheme;
   /** Face colors for 3D cube renderers. */
   experimentalCubeColors?: ExperimentalCubeColors;
@@ -244,6 +247,12 @@ export class TwistyPlayer
       ) {
         console.warn(`Invalid config passed to TwistyPlayer: ${propName}`);
         break;
+      }
+      if (
+        propName === "experimentalCubeColorScheme" &&
+        config.experimentalCubeColors !== undefined
+      ) {
+        continue;
       }
       (this as any)[propName] = value;
     }

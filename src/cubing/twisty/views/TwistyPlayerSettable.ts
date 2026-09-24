@@ -107,7 +107,8 @@ export abstract class TwistyPlayerSettable extends ManagedCustomElement {
   }
 
   /**
-   * Selects sticker colors for 3D cube renderers.
+   * @deprecated Use `experimentalCubeColors`. Both names set the same value,
+   * so the most recent assignment wins.
    */
   set experimentalCubeColorScheme(scheme:
     | ExperimentalCubeColorScheme

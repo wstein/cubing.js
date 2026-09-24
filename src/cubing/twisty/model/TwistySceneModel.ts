@@ -43,7 +43,7 @@ export class TwistySceneModel {
   stickeringRequest = new StickeringRequestProp();
   faceletScale = new FaceletScaleProp();
   experimentalCubeColors = new ExperimentalCubeColorsProp();
-  /** Compatibility alias; both names share one source and the last setting wins. */
+  /** @deprecated Alias of `experimentalCubeColors`; both share one source. */
   experimentalCubeColorScheme = this.experimentalCubeColors;
 
   // Depth 1

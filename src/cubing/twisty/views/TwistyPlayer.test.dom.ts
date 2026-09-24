@@ -56,6 +56,18 @@ test("accepts experimental cube colors through the new setting", async () => {
   );
 });
 
+test("prefers experimentalCubeColors over the deprecated name in config", async () => {
+  for (const config of [
+    { experimentalCubeColorScheme: "boy", experimentalCubeColors: "japanese" },
+    { experimentalCubeColors: "japanese", experimentalCubeColorScheme: "boy" },
+  ] as const) {
+    const player = new TwistyPlayer(config);
+    expect(
+      await player.experimentalModel.twistySceneModel.experimentalCubeColors.get(),
+    ).to.deep.equal(resolveCubeColors("japanese"));
+  }
+});
+
 test("can construct TwistyPlayer via constructor with fancy config", async () => {
   // Example from https://js.cubing.net/cubing/twisty/#parameters
   expect(
