@@ -6,6 +6,7 @@ import {
   type ExperimentalCubeColorScheme,
   resolveCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import { resolveCubeColors } from "../../../model/props/puzzle/display/ExperimentalCubeColorsProp";
 import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
@@ -68,6 +69,23 @@ test("PG3D restores native colors after clearing the scheme", async () => {
 
   expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([244, 244, 0]);
   pg3d.experimentalUpdateCubeColorScheme(undefined);
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([34, 102, 255]);
+});
+
+test("PG3D accepts and updates the new cube-colors option", async () => {
+  const pg3d = new PG3D(
+    () => {},
+    await cube3x3x3.kpuzzle(),
+    (await cube3x3x3.pg!()).get3d({ darkIgnoredOrbits: false }),
+    true,
+    false,
+    undefined,
+    1,
+    { experimentalCubeColors: resolveCubeColors("japanese") },
+  );
+
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([244, 244, 0]);
+  pg3d.experimentalUpdateCubeColors(undefined);
   expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([34, 102, 255]);
 });
 

@@ -4,6 +4,7 @@ import type { StickeringMask } from "../../puzzles/stickerings/mask";
 import type { ExperimentalStickering, PuzzleID } from "../../twisty";
 import type { MillisecondTimestamp } from "../controllers/AnimationTypes";
 import type { ExperimentalCubeColorScheme } from "../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import type { ExperimentalCubeColors } from "../model/props/puzzle/display/ExperimentalCubeColorsProp";
 import type { FaceletScale } from "../model/props/puzzle/display/FaceletScaleProp";
 import type { HintFaceletStyleWithAuto } from "../model/props/puzzle/display/HintFaceletProp";
 import type { InitialHintFaceletsAnimation } from "../model/props/puzzle/display/InitialHintFaceletsAnimationProp";
@@ -117,6 +118,13 @@ export abstract class TwistyPlayerSettable extends ManagedCustomElement {
   }
   get experimentalCubeColorScheme(): never {
     throw err("experimentalCubeColorScheme");
+  }
+
+  set experimentalCubeColors(colors: ExperimentalCubeColors | undefined) {
+    this.experimentalModel.twistySceneModel.experimentalCubeColors.set(colors);
+  }
+  get experimentalCubeColors(): never {
+    throw err("experimentalCubeColors");
   }
 
   set backView(backView: BackViewLayoutWithAuto) {

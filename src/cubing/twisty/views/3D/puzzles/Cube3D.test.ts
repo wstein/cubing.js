@@ -6,6 +6,7 @@ import {
   ExperimentalCubeColorSchemeProp,
   resolveCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import { resolveCubeColors } from "../../../model/props/puzzle/display/ExperimentalCubeColorsProp";
 import { Cube3D } from "./Cube3D";
 
 async function cube3DWithScheme(scheme: "japanese" | { F: string; D: number }) {
@@ -85,4 +86,16 @@ test("Cube3D dynamically updates its color scheme", async () => {
   expect(centerColor(cube3d, "D")).toBe(
     new Color(0xffff00).convertLinearToSRGB().getHex(),
   );
+});
+
+test("Cube3D accepts and updates the new cube-colors option", async () => {
+  const cube3d = new Cube3D(await cube3x3x3.kpuzzle(), undefined, {
+    experimentalCubeColors: resolveCubeColors("japanese"),
+  });
+
+  expect(centerColor(cube3d, "B")).toBe(
+    new Color(0xf4f400).convertLinearToSRGB().getHex(),
+  );
+  cube3d.experimentalUpdateCubeColors(resolveCubeColors({ F: "black" }));
+  expect(centerColor(cube3d, "F")).toBe(0x000000);
 });

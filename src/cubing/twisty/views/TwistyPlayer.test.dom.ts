@@ -2,6 +2,7 @@ import { expect } from "../../../test/chai-workarounds";
 import { Alg } from "../../alg";
 import { TwistyPlayer } from "..";
 import { resolveCubeColorScheme } from "../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import { resolveCubeColors } from "../model/props/puzzle/display/ExperimentalCubeColorsProp";
 
 const test = it;
 
@@ -31,6 +32,28 @@ test("accepts serialized custom cube colors as an attribute", async () => {
   expect(
     await player.experimentalModel.twistySceneModel.experimentalCubeColorScheme.get(),
   ).to.deep.equal(resolveCubeColorScheme("U:#000,D:#fff"));
+});
+
+test("accepts experimental cube colors through the new setting", async () => {
+  const player = new TwistyPlayer({ experimentalCubeColors: "japanese" });
+  const scene = player.experimentalModel.twistySceneModel;
+
+  expect(await scene.experimentalCubeColors.get()).to.deep.equal(
+    resolveCubeColors("japanese"),
+  );
+  expect(await scene.experimentalCubeColorScheme.get()).to.deep.equal(
+    resolveCubeColors("japanese"),
+  );
+
+  player.setAttribute("experimental-cube-colors", "U:#000,D:#fff");
+  expect(await scene.experimentalCubeColors.get()).to.deep.equal(
+    resolveCubeColors("U:#000,D:#fff"),
+  );
+
+  player.experimentalCubeColorScheme = "boy";
+  expect(await scene.experimentalCubeColors.get()).to.deep.equal(
+    resolveCubeColors("boy"),
+  );
 });
 
 test("can construct TwistyPlayer via constructor with fancy config", async () => {

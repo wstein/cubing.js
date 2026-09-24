@@ -497,6 +497,7 @@ class AxisInfo {
 
 export interface PG3DOptions {
   experimentalCubeColorScheme?: ResolvedCubeColorScheme;
+  experimentalCubeColors?: ResolvedCubeColorScheme;
   stickeringMask?: ExperimentalStickeringMask;
 }
 
@@ -569,6 +570,9 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
     private params: PG3DOptions = {},
   ) {
     super();
+    if (params.experimentalCubeColors !== undefined) {
+      params.experimentalCubeColorScheme = params.experimentalCubeColors;
+    }
     if (stickerDat.stickers.length === 0) {
       throw Error("Reuse of stickerdat from pg; please don't do that.");
     }
@@ -1140,6 +1144,10 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
       });
     }
     this.scheduleRenderCallback();
+  }
+
+  public experimentalUpdateCubeColors(colors?: ResolvedCubeColorScheme): void {
+    this.experimentalUpdateCubeColorScheme(colors);
   }
 
   private adduvs() {

@@ -29,6 +29,12 @@ export {
   type ExperimentalCubeColorScheme,
   type ResolvedCubeColorScheme,
 } from "./model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+export type {
+  CubeColorPreset,
+  CustomCubeColors,
+  ExperimentalCubeColors,
+  ResolvedCubeColors,
+} from "./model/props/puzzle/display/ExperimentalCubeColorsProp";
 export type { ExperimentalStickering } from "./model/props/puzzle/display/StickeringRequestProp";
 export type { PuzzleID } from "./model/props/puzzle/structure/PuzzleIDRequestProp";
 export { NO_VALUE as EXPERIMENTAL_PROP_NO_VALUE } from "./model/props/TwistyProp";

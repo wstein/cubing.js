@@ -261,6 +261,7 @@ export interface Cube3DOptions {
   faceletScale?: "auto" | number;
   hintFaceletsElevation?: "auto" | number;
   experimentalCubeColorScheme?: ResolvedCubeColorScheme;
+  experimentalCubeColors?: ResolvedCubeColorScheme;
 }
 
 const cube3DOptionsDefaults: Cube3DOptions = {
@@ -657,6 +658,9 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
 
     this.options = { ...cube3DOptionsDefaults };
     Object.assign(this.options, options); // TODO: check if this works
+    if (options.experimentalCubeColors !== undefined) {
+      this.options.experimentalCubeColorScheme = options.experimentalCubeColors;
+    }
 
     if (this.kpuzzle.name() !== "3x3x3") {
       throw new Error(
@@ -891,6 +895,10 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
       material.dispose();
     }
     this.scheduleRenderCallback?.();
+  }
+
+  public experimentalUpdateCubeColors(colors?: ResolvedCubeColorScheme): void {
+    this.experimentalUpdateCubeColorScheme(colors);
   }
 
   /** @deprecated */
