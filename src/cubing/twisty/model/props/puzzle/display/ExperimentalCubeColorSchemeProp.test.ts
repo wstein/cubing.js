@@ -6,10 +6,14 @@ import {
   resolveCubeColorScheme,
 } from "./ExperimentalCubeColorSchemeProp";
 
-test("defaults to the BOY cube color scheme", async () => {
+test("defaults to each renderer's native cube colors", async () => {
   const prop = new ExperimentalCubeColorSchemeProp();
 
+  expect(await prop.get()).toBeUndefined();
+  prop.set("boy");
   expect(await prop.get()).toEqual(BOY_CUBE_COLOR_SCHEME);
+  prop.set("default");
+  expect(await prop.get()).toBeUndefined();
 });
 
 test("resolves named cube color schemes by face", () => {

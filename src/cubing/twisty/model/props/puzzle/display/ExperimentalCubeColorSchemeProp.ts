@@ -21,7 +21,7 @@ export const JAPANESE_CUBE_COLOR_SCHEME = {
   D: BOY_CUBE_COLOR_SCHEME.B,
 } as const satisfies Record<CubeFace, CubeColor>;
 
-type CubeColorSchemePreset = "boy" | "western" | "japanese";
+type CubeColorSchemePreset = "boy" | "western" | "japanese" | "default";
 type SerializedCubeColorScheme = `${string}:${string}` | `{${string}}`;
 
 /** Sticker-color input for the PG3D renderer. */
@@ -85,8 +85,11 @@ function parseSerializedCubeColorScheme(
 }
 
 export function resolveCubeColorScheme(
-  input: ExperimentalCubeColorScheme,
-): ResolvedCubeColorScheme {
+  input: ExperimentalCubeColorScheme | undefined,
+): ResolvedCubeColorScheme | undefined {
+  if (input === undefined || input === "default") {
+    return undefined;
+  }
   switch (input) {
     case "boy":
     case "western":
@@ -103,16 +106,16 @@ export function resolveCubeColorScheme(
 }
 
 export class ExperimentalCubeColorSchemeProp extends TwistyPropSource<
-  ResolvedCubeColorScheme,
-  ExperimentalCubeColorScheme
+  ResolvedCubeColorScheme | undefined,
+  ExperimentalCubeColorScheme | undefined
 > {
-  getDefaultValue(): ResolvedCubeColorScheme {
-    return BOY_CUBE_COLOR_SCHEME;
+  getDefaultValue(): undefined {
+    return undefined;
   }
 
   protected derive(
-    input: ExperimentalCubeColorScheme,
-  ): ResolvedCubeColorScheme {
+    input: ExperimentalCubeColorScheme | undefined,
+  ): ResolvedCubeColorScheme | undefined {
     return resolveCubeColorScheme(input);
   }
 }

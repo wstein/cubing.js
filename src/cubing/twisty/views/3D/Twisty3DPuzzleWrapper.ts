@@ -110,10 +110,10 @@ export class Twisty3DPuzzleWrapper extends EventTarget implements Schedulable {
 
     this.#freshListenerManager.addListener(
       this.model.twistySceneModel.experimentalCubeColorScheme,
-      async (scheme: ResolvedCubeColorScheme) => {
+      async (scheme: ResolvedCubeColorScheme | undefined) => {
         const twisty3D = await this.twisty3DPuzzle();
         if ("experimentalUpdateCubeColorScheme" in twisty3D) {
-          (twisty3D as PG3D).experimentalUpdateCubeColorScheme(scheme);
+          (twisty3D as Cube3D | PG3D).experimentalUpdateCubeColorScheme(scheme);
           this.scheduleRender();
         }
       },

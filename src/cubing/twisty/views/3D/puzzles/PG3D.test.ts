@@ -9,7 +9,7 @@ import {
 import { PG3D } from "./PG3D";
 
 async function stickerColorOnFace(
-  scheme: ExperimentalCubeColorScheme,
+  scheme: ExperimentalCubeColorScheme | undefined,
   axis: "y" | "z",
   direction: 1 | -1,
 ): Promise<number[]> {
@@ -23,6 +23,14 @@ async function stickerColorOnFace(
     1,
     { experimentalCubeColorScheme: resolveCubeColorScheme(scheme) },
   );
+  return stickerColorFromPG3D(pg3d, axis, direction);
+}
+
+function stickerColorFromPG3D(
+  pg3d: PG3D,
+  axis: "y" | "z",
+  direction: 1 | -1,
+): number[] {
   const mesh = pg3d.children[0] as Mesh;
   const positions = mesh.geometry.getAttribute("position");
   const colors = mesh.geometry.getAttribute("color");
@@ -37,12 +45,30 @@ async function stickerColorOnFace(
 }
 
 test("PG3D renders the Japanese blue-yellow swap", async () => {
+  expect(await stickerColorOnFace(undefined, "z", 1)).toEqual([68, 238, 0]);
   expect(await stickerColorOnFace("boy", "z", 1)).toEqual([68, 238, 0]);
   expect(await stickerColorOnFace("boy", "z", -1)).toEqual([34, 102, 255]);
   expect(await stickerColorOnFace("boy", "y", -1)).toEqual([244, 244, 0]);
   expect(await stickerColorOnFace("japanese", "z", 1)).toEqual([68, 238, 0]);
   expect(await stickerColorOnFace("japanese", "z", -1)).toEqual([244, 244, 0]);
   expect(await stickerColorOnFace("japanese", "y", -1)).toEqual([34, 102, 255]);
+});
+
+test("PG3D restores native colors after clearing the scheme", async () => {
+  const pg3d = new PG3D(
+    () => {},
+    await cube3x3x3.kpuzzle(),
+    (await cube3x3x3.pg!()).get3d({ darkIgnoredOrbits: false }),
+    true,
+    false,
+    undefined,
+    1,
+    { experimentalCubeColorScheme: resolveCubeColorScheme("japanese") },
+  );
+
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([244, 244, 0]);
+  pg3d.experimentalUpdateCubeColorScheme(undefined);
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([34, 102, 255]);
 });
 
 test("PG3D applies custom colors by face", async () => {

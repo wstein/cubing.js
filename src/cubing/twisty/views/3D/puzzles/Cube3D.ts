@@ -582,6 +582,7 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
   // TODO: Keep track of option-based meshes better.
   private experimentalHintStickerMeshes: Mesh[] = [];
   private experimentalFoundationMeshes: Mesh[] = [];
+  private customStickerMaterials = new Map<string, MeshBasicMaterial>();
 
   private stickerMaterial(
     faceIdx: number,
@@ -599,6 +600,11 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
     ) {
       return defaultMaterial;
     }
+    const key = `${faceIdx}:${isHint}:${stickeringMask}`;
+    const cachedMaterial = this.customStickerMaterials.get(key);
+    if (cachedMaterial) {
+      return cachedMaterial;
+    }
     const regularColor = new Color(color).getHex();
     const materialColor =
       stickeringMask === "dim"
@@ -606,12 +612,14 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
           ? 0xdddddd
           : new Color(regularColor).multiplyScalar(0.5).getHex()
         : regularColor;
-    return new MeshBasicMaterial({
+    const material = new MeshBasicMaterial({
       color: new Color(materialColor).convertLinearToSRGB(),
       side: isHint ? BackSide : FrontSide,
       transparent: isHint,
       opacity: isHint ? 0.5 * axesInfo[faceIdx].hintOpacityScale : 1,
     });
+    this.customStickerMaterials.set(key, material);
+    return material;
   }
 
   #setSpriteURL: ((url: string) => void) | undefined;
@@ -848,14 +856,19 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
   }
 
   public experimentalUpdateCubeColorScheme(
-    scheme: ResolvedCubeColorScheme,
+    scheme: ResolvedCubeColorScheme | undefined,
   ): void {
+    if (this.options.experimentalCubeColorScheme === scheme) {
+      return;
+    }
+    this.options.experimentalCubeColorScheme = scheme;
     if (
       this.options.experimentalStickeringMask?.specialBehaviour === "picture"
     ) {
       return;
     }
-    this.options.experimentalCubeColorScheme = scheme;
+    const oldMaterials = this.customStickerMaterials;
+    this.customStickerMaterials = new Map();
     for (const pieceInfos of Object.values(this.kpuzzleFaceletInfo)) {
       for (const faceletInfos of pieceInfos) {
         for (const faceletInfo of faceletInfos) {
@@ -873,6 +886,9 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
           }
         }
       }
+    }
+    for (const material of oldMaterials.values()) {
+      material.dispose();
     }
     this.scheduleRenderCallback?.();
   }

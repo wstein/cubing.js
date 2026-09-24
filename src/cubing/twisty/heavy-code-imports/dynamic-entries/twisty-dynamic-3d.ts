@@ -33,7 +33,7 @@ export async function pg3dShim(
   hintFacelets: HintFaceletStyle,
   faceletScale: FaceletScale,
   darkIgnoredOrbits: boolean,
-  experimentalCubeColorScheme: ResolvedCubeColorScheme,
+  experimentalCubeColorScheme: ResolvedCubeColorScheme | undefined,
 ): Promise<PG3D> {
   return new PG3D(
     renderCallback,

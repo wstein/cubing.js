@@ -2,7 +2,10 @@ import { expect, test } from "bun:test";
 import type { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 import { Color } from "three/src/math/Color.js";
 import { cube3x3x3 } from "../../../../puzzles";
-import { resolveCubeColorScheme } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
+import {
+  ExperimentalCubeColorSchemeProp,
+  resolveCubeColorScheme,
+} from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import { Cube3D } from "./Cube3D";
 
 async function cube3DWithScheme(scheme: "japanese" | { F: string; D: number }) {
@@ -17,6 +20,31 @@ function centerColor(cube3d: Cube3D, face: "F" | "B" | "D"): number {
     .material as MeshBasicMaterial;
   return material.color.getHex();
 }
+
+test("Cube3D preserves its original colors when no scheme is requested", async () => {
+  const cube3d = new Cube3D(await cube3x3x3.kpuzzle());
+
+  expect(centerColor(cube3d, "F")).toBe(
+    new Color(0x00ff00).convertLinearToSRGB().getHex(),
+  );
+  expect(centerColor(cube3d, "D")).toBe(
+    new Color(0xffff00).convertLinearToSRGB().getHex(),
+  );
+});
+
+test("the default scene scheme preserves Cube3D's original colors", async () => {
+  const scheme = await new ExperimentalCubeColorSchemeProp().get();
+  const cube3d = new Cube3D(await cube3x3x3.kpuzzle(), undefined, {
+    experimentalCubeColorScheme: scheme,
+  });
+
+  expect(centerColor(cube3d, "F")).toBe(
+    new Color(0x00ff00).convertLinearToSRGB().getHex(),
+  );
+  expect(centerColor(cube3d, "D")).toBe(
+    new Color(0xffff00).convertLinearToSRGB().getHex(),
+  );
+});
 
 test("Cube3D renders the Japanese blue-yellow swap", async () => {
   const cube3d = await cube3DWithScheme("japanese");
@@ -38,10 +66,23 @@ test("Cube3D renders custom colors by face", async () => {
 
 test("Cube3D dynamically updates its color scheme", async () => {
   const cube3d = await cube3DWithScheme("japanese");
+  const oldMaterial = cube3d.kpuzzleFaceletInfo["CENTERS"][2][0].facelet
+    .material as MeshBasicMaterial;
+  let disposeCount = 0;
+  oldMaterial.addEventListener("dispose", () => disposeCount++);
   cube3d.experimentalUpdateCubeColorScheme(
     resolveCubeColorScheme({ F: "black", D: 0xffffff }),
   );
 
+  expect(disposeCount).toBe(1);
   expect(centerColor(cube3d, "F")).toBe(0x000000);
   expect(centerColor(cube3d, "D")).toBe(0xffffff);
+
+  cube3d.experimentalUpdateCubeColorScheme(undefined);
+  expect(centerColor(cube3d, "F")).toBe(
+    new Color(0x00ff00).convertLinearToSRGB().getHex(),
+  );
+  expect(centerColor(cube3d, "D")).toBe(
+    new Color(0xffff00).convertLinearToSRGB().getHex(),
+  );
 });
