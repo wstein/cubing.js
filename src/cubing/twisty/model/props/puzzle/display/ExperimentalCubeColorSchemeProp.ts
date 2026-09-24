@@ -61,6 +61,30 @@ function parseCustomCubeColorScheme(input: unknown): CustomCubeColorScheme {
   return scheme;
 }
 
+// Splits on commas outside parentheses, so `rgb(0, 0, 0)` stays one entry.
+function splitSerializedEntries(input: string): string[] {
+  const entries: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < input.length; i++) {
+    switch (input[i]) {
+      case "(":
+        depth++;
+        break;
+      case ")":
+        depth = Math.max(0, depth - 1);
+        break;
+      case ",":
+        if (depth === 0) {
+          entries.push(input.slice(start, i));
+          start = i + 1;
+        }
+    }
+  }
+  entries.push(input.slice(start));
+  return entries;
+}
+
 function parseSerializedCubeColorScheme(
   input: SerializedCubeColorScheme,
 ): CustomCubeColorScheme {
@@ -69,7 +93,7 @@ function parseSerializedCubeColorScheme(
     return parseCustomCubeColorScheme(JSON.parse(trimmed));
   }
   const scheme: Record<string, string> = {};
-  for (const rawEntry of trimmed.split(",")) {
+  for (const rawEntry of splitSerializedEntries(trimmed)) {
     const entry = rawEntry.trim();
     if (!entry) {
       continue;

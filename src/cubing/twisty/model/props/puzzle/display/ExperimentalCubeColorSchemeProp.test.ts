@@ -65,3 +65,11 @@ test("resolved presets cannot be mutated", () => {
   }).toThrow();
   expect(resolveCubeColorScheme("boy")?.F).toBe(0x44ee00);
 });
+
+test("parses functional CSS colors in serialized schemes", () => {
+  expect(resolveCubeColorScheme("U:rgb(0, 0, 0), D:hsl(0, 0%, 100%)")).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "rgb(0, 0, 0)",
+    D: "hsl(0, 0%, 100%)",
+  });
+});
