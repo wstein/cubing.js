@@ -92,10 +92,23 @@ test("Cube3D renders custom colors by face", async () => {
 
 test("Cube3D dynamically updates its cube colors", async () => {
   const cube3d = await cube3DWithColors("japanese");
+  const oldMaterial = cube3d.kpuzzleFaceletInfo["CENTERS"][2][0].facelet
+    .material as MeshBasicMaterial;
+  let disposeCount = 0;
+  oldMaterial.addEventListener("dispose", () => disposeCount++);
   cube3d.experimentalUpdateCubeColors(
     resolveCubeColors({ F: "black", D: 0xffffff }),
   );
 
+  expect(disposeCount).toBe(1);
   expect(centerColor(cube3d, "F")).toBe(0x000000);
   expect(centerColor(cube3d, "D")).toBe(0xffffff);
+
+  cube3d.experimentalUpdateCubeColors(undefined);
+  expect(centerColor(cube3d, "F")).toBe(
+    new Color(0x00ff00).convertLinearToSRGB().getHex(),
+  );
+  expect(centerColor(cube3d, "D")).toBe(
+    new Color(0xffff00).convertLinearToSRGB().getHex(),
+  );
 });

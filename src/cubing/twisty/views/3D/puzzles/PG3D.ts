@@ -1130,6 +1130,11 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
     this.#pendingStickeringUpdate = true;
     if (this.lastPos) {
       this.onPositionChange(this.lastPos);
+    } else {
+      this.onPositionChange({
+        pattern: this.kpuzzle.defaultPattern(),
+        movesInProgress: [],
+      });
     }
     this.scheduleRenderCallback();
   }

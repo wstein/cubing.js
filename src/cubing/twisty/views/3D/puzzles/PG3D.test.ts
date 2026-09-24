@@ -23,6 +23,14 @@ async function stickerColorOnFace(
     1,
     { experimentalCubeColors: resolveCubeColors(colors) },
   );
+  return stickerColorFromPG3D(pg3d, axis, direction);
+}
+
+function stickerColorFromPG3D(
+  pg3d: PG3D,
+  axis: "y" | "z",
+  direction: 1 | -1,
+): number[] {
   const mesh = pg3d.children[0] as Mesh;
   const positions = mesh.geometry.getAttribute("position");
   const meshColors = mesh.geometry.getAttribute("color");
@@ -40,6 +48,23 @@ test("PG3D renders default colors when no cube colors are specified", async () =
   expect(await stickerColorOnFace(undefined, "z", 1)).toEqual([68, 238, 0]);
   expect(await stickerColorOnFace(undefined, "z", -1)).toEqual([34, 102, 255]);
   expect(await stickerColorOnFace(undefined, "y", -1)).toEqual([244, 244, 0]);
+});
+
+test("PG3D restores native colors before the first position update", async () => {
+  const pg3d = new PG3D(
+    () => {},
+    await cube3x3x3.kpuzzle(),
+    (await cube3x3x3.pg!()).get3d({ darkIgnoredOrbits: false }),
+    true,
+    false,
+    undefined,
+    1,
+    { experimentalCubeColors: resolveCubeColors("japanese") },
+  );
+
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([244, 244, 0]);
+  pg3d.experimentalUpdateCubeColors(undefined);
+  expect(stickerColorFromPG3D(pg3d, "z", -1)).toEqual([34, 102, 255]);
 });
 
 test("PG3D renders the Japanese blue-yellow swap", async () => {
