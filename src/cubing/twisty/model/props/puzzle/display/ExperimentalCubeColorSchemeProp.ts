@@ -6,20 +6,21 @@ export type CubeFace = (typeof CUBE_FACES)[number];
 export type CubeColor = string | number;
 export type CustomCubeColorScheme = Partial<Record<CubeFace, CubeColor>>;
 
-export const BOY_CUBE_COLOR_SCHEME = {
+// Presets are frozen because resolving one returns the shared object.
+export const BOY_CUBE_COLOR_SCHEME = Object.freeze({
   U: 0xffffff,
   L: 0xff8000,
   F: 0x44ee00,
   R: 0xff0000,
   B: 0x2266ff,
   D: 0xf4f400,
-} as const satisfies Record<CubeFace, CubeColor>;
+} as const satisfies Record<CubeFace, CubeColor>);
 
-export const JAPANESE_CUBE_COLOR_SCHEME = {
+export const JAPANESE_CUBE_COLOR_SCHEME = Object.freeze({
   ...BOY_CUBE_COLOR_SCHEME,
   B: BOY_CUBE_COLOR_SCHEME.D,
   D: BOY_CUBE_COLOR_SCHEME.B,
-} as const satisfies Record<CubeFace, CubeColor>;
+} as const satisfies Record<CubeFace, CubeColor>);
 
 type CubeColorSchemePreset = "boy" | "western" | "japanese" | "default";
 type SerializedCubeColorScheme = `${string}:${string}` | `{${string}}`;
@@ -30,7 +31,7 @@ export type ExperimentalCubeColorScheme =
   | CustomCubeColorScheme
   | SerializedCubeColorScheme;
 
-export type ResolvedCubeColorScheme = Record<CubeFace, CubeColor>;
+export type ResolvedCubeColorScheme = Readonly<Record<CubeFace, CubeColor>>;
 
 function isCubeFace(face: string): face is CubeFace {
   return (CUBE_FACES as readonly string[]).includes(face);
@@ -60,6 +61,30 @@ function parseCustomCubeColorScheme(input: unknown): CustomCubeColorScheme {
   return scheme;
 }
 
+// Splits on commas outside parentheses, so `rgb(0, 0, 0)` stays one entry.
+function splitSerializedEntries(input: string): string[] {
+  const entries: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < input.length; i++) {
+    switch (input[i]) {
+      case "(":
+        depth++;
+        break;
+      case ")":
+        depth = Math.max(0, depth - 1);
+        break;
+      case ",":
+        if (depth === 0) {
+          entries.push(input.slice(start, i));
+          start = i + 1;
+        }
+    }
+  }
+  entries.push(input.slice(start));
+  return entries;
+}
+
 function parseSerializedCubeColorScheme(
   input: SerializedCubeColorScheme,
 ): CustomCubeColorScheme {
@@ -68,7 +93,7 @@ function parseSerializedCubeColorScheme(
     return parseCustomCubeColorScheme(JSON.parse(trimmed));
   }
   const scheme: Record<string, string> = {};
-  for (const rawEntry of trimmed.split(",")) {
+  for (const rawEntry of splitSerializedEntries(trimmed)) {
     const entry = rawEntry.trim();
     if (!entry) {
       continue;

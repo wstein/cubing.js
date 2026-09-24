@@ -57,3 +57,19 @@ test("parses serialized custom cube color schemes", () => {
     D: 0xffffff,
   });
 });
+
+test("resolved presets cannot be mutated", () => {
+  const boy = resolveCubeColorScheme("boy") as Record<string, unknown>;
+  expect(() => {
+    boy["F"] = 0x000000;
+  }).toThrow();
+  expect(resolveCubeColorScheme("boy")?.F).toBe(0x44ee00);
+});
+
+test("parses functional CSS colors in serialized schemes", () => {
+  expect(resolveCubeColorScheme("U:rgb(0, 0, 0), D:hsl(0, 0%, 100%)")).toEqual({
+    ...BOY_CUBE_COLOR_SCHEME,
+    U: "rgb(0, 0, 0)",
+    D: "hsl(0, 0%, 100%)",
+  });
+});

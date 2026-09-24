@@ -97,8 +97,10 @@ test("PG3D applies custom colors by face", async () => {
   expect(await stickerColorOnFace(scheme, "z", -1)).toEqual([34, 102, 255]);
 });
 
-test("PG3D safely handles non-cube puzzles with a color scheme", async () => {
-  const pg3d = new PG3D(
+async function pyraminxPG3D(
+  scheme: ExperimentalCubeColorScheme | undefined,
+): Promise<PG3D> {
+  return new PG3D(
     () => {},
     await puzzles["pyraminx"].kpuzzle(),
     (await puzzles["pyraminx"].pg!()).get3d({ darkIgnoredOrbits: false }),
@@ -106,9 +108,23 @@ test("PG3D safely handles non-cube puzzles with a color scheme", async () => {
     false,
     undefined,
     1,
-    { experimentalCubeColorScheme: resolveCubeColorScheme("japanese") },
+    { experimentalCubeColorScheme: resolveCubeColorScheme(scheme) },
   );
-  expect(pg3d.children.length).toBeGreaterThan(0);
+}
+
+function meshColors(pg3d: PG3D): number[] {
+  return Array.from(
+    (pg3d.children[0] as Mesh).geometry.getAttribute("color").array,
+  );
+}
+
+test("PG3D ignores cube color schemes on non-cube puzzles", async () => {
+  const defaultColors = meshColors(await pyraminxPG3D(undefined));
+  expect(meshColors(await pyraminxPG3D("japanese"))).toEqual(defaultColors);
+
+  const pg3d = await pyraminxPG3D(undefined);
+  pg3d.experimentalUpdateCubeColorScheme(resolveCubeColorScheme("japanese"));
+  expect(meshColors(pg3d)).toEqual(defaultColors);
 });
 
 test("PG3D does not rewind moves when updating cube color scheme", async () => {
