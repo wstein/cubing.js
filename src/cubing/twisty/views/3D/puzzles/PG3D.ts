@@ -25,9 +25,10 @@ import {
 } from "../../../../puzzles/cubing-private";
 import type { PuzzlePosition } from "../../../controllers/AnimationTypes";
 import { smootherStep } from "../../../controllers/easing";
-import type {
-  CubeFace,
-  ResolvedCubeColorScheme,
+import {
+  CUBE_FACES,
+  type CubeFace,
+  type ResolvedCubeColorScheme,
 } from "../../../model/props/puzzle/display/ExperimentalCubeColorSchemeProp";
 import type { HintFaceletStyle } from "../../../model/props/puzzle/display/HintFaceletProp";
 import { TAU } from "../TAU";
@@ -558,6 +559,7 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
   private stickerMaterialDisposable: boolean;
 
   #pendingStickeringUpdate: boolean = false;
+  #isCubeShaped: boolean;
 
   constructor(
     private scheduleRenderCallback: () => void,
@@ -572,6 +574,15 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
     super();
     if (params.experimentalCubeColors !== undefined) {
       params.experimentalCubeColorScheme = params.experimentalCubeColors;
+    }
+    // Other shapes can share face names (e.g. Pyraminx has F, L, R, D).
+    this.#isCubeShaped =
+      stickerDat.faces.length === CUBE_FACES.length &&
+      CUBE_FACES.every((face) =>
+        stickerDat.faces.some(({ name }) => name === face),
+      );
+    if (!this.#isCubeShaped) {
+      params.experimentalCubeColorScheme = undefined;
     }
     if (stickerDat.stickers.length === 0) {
       throw Error("Reuse of stickerdat from pg; please don't do that.");
@@ -1123,7 +1134,10 @@ export class PG3D extends Object3D implements Twisty3DPuzzle {
   public experimentalUpdateCubeColorScheme(
     scheme: ResolvedCubeColorScheme | undefined,
   ): void {
-    if (this.params.experimentalCubeColorScheme === scheme) {
+    if (
+      !this.#isCubeShaped ||
+      this.params.experimentalCubeColorScheme === scheme
+    ) {
       return;
     }
     this.params.experimentalCubeColorScheme = scheme;
