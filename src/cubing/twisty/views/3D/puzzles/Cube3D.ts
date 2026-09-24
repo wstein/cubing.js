@@ -866,13 +866,17 @@ export class Cube3D extends Object3D implements Twisty3DPuzzle {
       return;
     }
     this.options.experimentalCubeColorScheme = scheme;
+    const oldMaterials = this.customStickerMaterials;
+    this.customStickerMaterials = new Map();
     if (
       this.options.experimentalStickeringMask?.specialBehaviour === "picture"
     ) {
+      // Picture facelets use `invisibleMaterial`, so the old colors are unused.
+      for (const material of oldMaterials.values()) {
+        material.dispose();
+      }
       return;
     }
-    const oldMaterials = this.customStickerMaterials;
-    this.customStickerMaterials = new Map();
     for (const pieceInfos of Object.values(this.kpuzzleFaceletInfo)) {
       for (const faceletInfos of pieceInfos) {
         for (const faceletInfo of faceletInfos) {

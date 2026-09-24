@@ -102,6 +102,13 @@ test("Cube3D accepts and updates the new cube-colors option", async () => {
 });
 
 const pictureMask: StickeringMask = { specialBehaviour: "picture", orbits: {} };
+const regularCentersMask: StickeringMask = {
+  orbits: {
+    CENTERS: {
+      pieces: Array.from({ length: 6 }, () => ({ facelets: ["regular"] })),
+    },
+  },
+};
 
 function centerVisible(cube3d: Cube3D, face: "F" | "B" | "D"): boolean {
   const faceIndex = { F: 2, B: 4, D: 5 }[face];
@@ -119,4 +126,22 @@ test("Cube3D keeps picture facelets hidden when the scheme changes", async () =>
     resolveCubeColorScheme({ F: "black" }),
   );
   expect(centerVisible(cube3d, "F")).toBe(false);
+});
+
+test("Cube3D applies a scheme changed during picture mode after leaving it", async () => {
+  const cube3d = new Cube3D(await cube3x3x3.kpuzzle(), undefined, {
+    experimentalCubeColorScheme: resolveCubeColorScheme("japanese"),
+    experimentalStickeringMask: pictureMask,
+  });
+  // Populate the material cache with the old scheme before entering picture mode.
+  cube3d.setStickeringMask(regularCentersMask);
+  cube3d.setStickeringMask(pictureMask);
+  cube3d.experimentalUpdateCubeColorScheme(
+    resolveCubeColorScheme({ F: "black", D: 0xffffff }),
+  );
+  cube3d.setStickeringMask(regularCentersMask);
+
+  expect(centerVisible(cube3d, "F")).toBe(true);
+  expect(centerColor(cube3d, "F")).toBe(0x000000);
+  expect(centerColor(cube3d, "D")).toBe(0xffffff);
 });
