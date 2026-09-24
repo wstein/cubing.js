@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import type { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 import { Color } from "three/src/math/Color.js";
 import { cube3x3x3 } from "../../../../puzzles";
+import type { StickeringMask } from "../../../../puzzles/stickerings/mask";
 import {
   ExperimentalCubeColorSchemeProp,
   resolveCubeColorScheme,
@@ -98,4 +99,24 @@ test("Cube3D accepts and updates the new cube-colors option", async () => {
   );
   cube3d.experimentalUpdateCubeColors(resolveCubeColors({ F: "black" }));
   expect(centerColor(cube3d, "F")).toBe(0x000000);
+});
+
+const pictureMask: StickeringMask = { specialBehaviour: "picture", orbits: {} };
+
+function centerVisible(cube3d: Cube3D, face: "F" | "B" | "D"): boolean {
+  const faceIndex = { F: 2, B: 4, D: 5 }[face];
+  const material = cube3d.kpuzzleFaceletInfo["CENTERS"][faceIndex][0].facelet
+    .material as MeshBasicMaterial;
+  return material.visible;
+}
+
+test("Cube3D keeps picture facelets hidden when the scheme changes", async () => {
+  const cube3d = await cube3DWithScheme("japanese");
+  cube3d.setStickeringMask(pictureMask);
+  expect(centerVisible(cube3d, "F")).toBe(false);
+
+  cube3d.experimentalUpdateCubeColorScheme(
+    resolveCubeColorScheme({ F: "black" }),
+  );
+  expect(centerVisible(cube3d, "F")).toBe(false);
 });
