@@ -1,0 +1,1 @@
+export type * from "../dist/lib/cubing/alg/index.d.ts";
